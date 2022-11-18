@@ -1,5 +1,5 @@
 [package]
-name = "simple-linear-types"
+name = "quantitative-types"
 version = "0.1"
 lean_version = "leanprover-community/lean:3.49.0"
 path = "src"

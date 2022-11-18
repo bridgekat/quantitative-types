@@ -1,13 +1,9 @@
 import algebra.group.defs
 import algebra.module.basic
 
-import type
+import defs
 
--- Multiplicities
-inductive mult : Type
-| zero : mult
-| one  : mult
-| many : mult
+namespace quantitative_types
 
 def mult.add : mult → mult → mult
 | mult.zero a         := a
@@ -53,13 +49,6 @@ instance : semiring mult :=
   mul_assoc := mult.mul_assoc,
   left_distrib := mult.left_distrib,
   right_distrib := mult.right_distrib }
-
--- Contexts
-def ctype := list type
-
-inductive ctx : ctype → Type
-| nil  :                                              ctx []
-| cons : Π {γ : ctype} (t : type) (π : mult), ctx γ → ctx (t :: γ)
 
 notation `⟦` t:max ` · ` π:max `⟧` ` :: ` Γ:90 := ctx.cons t π Γ
 notation `⟦` t:max ` · ` π:max `⟧`             := ctx.cons t π ctx.nil
@@ -169,3 +158,5 @@ instance {γ : ctype} : module mult (ctx γ) :=
   smul_add := ctx.smul_add,
   zero_smul := ctx.zero_smul,
   add_smul := ctx.add_smul }
+
+end quantitative_types
