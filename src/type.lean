@@ -1,3 +1,5 @@
 -- Types
+
 inductive type : Type
-| nat | bool
+| nat  : type
+| bool : type

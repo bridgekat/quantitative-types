@@ -1,5 +1,3 @@
--- See: https://project-archive.inf.ed.ac.uk/ug4/20191567/ug4_proj.pdf
-
 import type
 import context
 

@@ -1,10 +1,13 @@
-import algebra
+import algebra.group.defs
+import algebra.module.basic
 
 import type
 
 -- Multiplicities
 inductive mult : Type
-| zero | one | many
+| zero : mult
+| one  : mult
+| many : mult
 
 def mult.add : mult → mult → mult
 | mult.zero a         := a
