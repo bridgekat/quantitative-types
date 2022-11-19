@@ -52,7 +52,9 @@ meta def main : io unit := do
   io.put_str_ln e₁.show,
   io.put_str_ln "",
   let res := do
-  { ⟨t, π⟩ ← expr.check c₁ e₁ ctx.nil,
+  { -- Changing the last argument to 1 will certainly fail:
+    -- we cannot make a runtime instance of the "forall" variable!
+    t ← e₁.check c₁ 0,
     return t.show },
   match res with
   | (sum.inl msg) := io.put_str_ln $ "Error: " ++ msg

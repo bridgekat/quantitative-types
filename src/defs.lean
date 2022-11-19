@@ -57,10 +57,10 @@ def expr.show : expr → string
 instance : has_to_string expr := ⟨expr.show⟩
 instance : has_repr expr := ⟨expr.show⟩
 
-/-- Context types (precontexts) -/
+/-- Context types -/
 def ctype := list expr
 
-/-- Contexts -/
+/-- Contexts (precontexts) -/
 @[derive decidable_eq]
 inductive ctx : ctype → Type
 | nil  :                                              ctx []
@@ -71,9 +71,9 @@ notation `⟦` t:max ` · ` π:max `⟧` ` :: ` Γ:90 := cons t π Γ
 notation `⟦` t:max ` · ` π:max `⟧`             := cons t π nil
 
 def ctx.show : Π {γ : ctype}, ctx γ → string
-| []       nil          := "ctx.nil"
-| [t]      (cons _ π _) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧"
-| (t :: γ) (cons _ π Γ) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧ :: \n" ++ ctx.show Γ 
+| []       nil          := "ctx.nil\n"
+| [t]      (cons _ π _) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧\n"
+| (t :: γ) (cons _ π Γ) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧ ::\n" ++ ctx.show Γ 
 
 instance {γ : ctype} : has_to_string (ctx γ) := ⟨ctx.show⟩
 instance {γ : ctype} : has_repr (ctx γ) := ⟨ctx.show⟩
