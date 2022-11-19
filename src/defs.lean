@@ -6,7 +6,7 @@ inductive idx : Type
 | bound : nat → idx
 | free  : nat → idx
 
--- Expressions
+-- Expressions (preterms)
 @[derive decidable_eq]
 inductive expr : Type
 | sort : nat →         expr
@@ -15,20 +15,19 @@ inductive expr : Type
 | lam  : expr → expr → expr
 | pi   : expr → expr → expr
 
-def type := expr
-def ctype := list type
-
--- Multiplicities
+-- Multiplicities (we use the 3-element semiring here)
 @[derive decidable_eq]
 inductive mult : Type
-| zero : mult
-| one  : mult
-| many : mult
+| zero : mult          -- For use in dependent type checking only
+| one  : mult          -- Linear assumptions
+| many : mult          -- Unrestricted assumptions
 
 -- Contexts
+def ctype := list expr
+
 @[derive decidable_eq]
 inductive ctx : ctype → Type
 | nil  :                                              ctx []
-| cons : Π {γ : ctype} (t : type) (π : mult), ctx γ → ctx (t :: γ)
+| cons : Π {γ : ctype} (t : expr) (π : mult), ctx γ → ctx (t :: γ)
 
 end quantitative_types

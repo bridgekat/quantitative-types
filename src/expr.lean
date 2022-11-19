@@ -13,11 +13,13 @@ instance : has_to_string idx := ⟨idx.show⟩
 instance : has_repr idx := ⟨idx.show⟩
 
 def expr.show : expr → string
-| (sort s)  := "Sort " ++ to_string s
-| (var v)   := v.show
-| (app l r) := "(" ++ l.show ++ " " ++ r.show ++ ")"
-| (lam t r) := "(\\$: " ++ t.show ++ " => " ++ r.show ++ ")"
-| (pi t r)  := "($: " ++ t.show ++ " -> " ++ r.show ++ ")"
+| (sort 0)        := "Prop"
+| (sort 1)        := "Type"
+| (sort (s + 1))  := "Type " ++ to_string s
+| (var v)         := v.show
+| (app l r)       := "(" ++ l.show ++ " " ++ r.show ++ ")"
+| (lam t r)       := "(\\$: " ++ t.show ++ " => " ++ r.show ++ ")"
+| (pi t r)        := "($: " ++ t.show ++ " -> " ++ r.show ++ ")"
 
 instance : has_to_string expr := ⟨expr.show⟩
 instance : has_repr expr := ⟨expr.show⟩
