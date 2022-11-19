@@ -15,32 +15,32 @@ def bin := λ a f b, app (app f a) b
 
 -- Examples adapted from ApiMu (FOLContext).
 def c₀ :=
-  ⟦(pi (pi (fv 0) prop) prop)   · 0⟧ :: -- [12] unique    : (setvar → Prop) → Prop
-  ⟦(pi (pi (fv 0) prop) prop)   · 0⟧ :: -- [11] exists    : (setvar → Prop) → Prop
-  ⟦(pi (pi (fv 0) prop) prop)   · 0⟧ :: -- [10] forall    : (setvar → Prop) → Prop
-  ⟦(pi prop $ pi prop prop)     · 0⟧ :: -- [9]  iff       : Prop → Prop → Prop
-  ⟦(pi prop $ pi prop prop)     · 0⟧ :: -- [8]  implies   : Prop → Prop → Prop
-  ⟦(pi prop $ pi prop prop)     · 0⟧ :: -- [7]  or        : Prop → Prop → Prop
-  ⟦(pi prop $ pi prop prop)     · 0⟧ :: -- [6]  and       : Prop → Prop → Prop
-  ⟦(pi prop prop)               · 0⟧ :: -- [5]  not       : Prop → Prop
-  ⟦prop                         · 0⟧ :: -- [4]  false     : Prop
-  ⟦prop                         · 0⟧ :: -- [3]  true      : Prop
-  ⟦(pi (fv 0) $ pi (fv 0) prop) · 0⟧ :: -- [2]  equals    : setvar → setvar → Prop
-  ⟦(fv 0)                       · 0⟧ :: -- [1]  arbitrary : setvar 
-  ⟦type                         · 0⟧    -- [0]  setvar    : Type
+  ⟦(pi (pi (fv 0) 0 prop) 0 prop)   · 0⟧ :: -- [12] unique    : (setvar → Prop) → Prop
+  ⟦(pi (pi (fv 0) 0 prop) 0 prop)   · 0⟧ :: -- [11] exists    : (setvar → Prop) → Prop
+  ⟦(pi (pi (fv 0) 0 prop) 0 prop)   · 0⟧ :: -- [10] forall    : (setvar → Prop) → Prop
+  ⟦(pi prop 0 $ pi prop 0 prop)     · 0⟧ :: -- [9]  iff       : Prop → Prop → Prop
+  ⟦(pi prop 0 $ pi prop 0 prop)     · 0⟧ :: -- [8]  implies   : Prop → Prop → Prop
+  ⟦(pi prop 0 $ pi prop 0 prop)     · 0⟧ :: -- [7]  or        : Prop → Prop → Prop
+  ⟦(pi prop 0 $ pi prop 0 prop)     · 0⟧ :: -- [6]  and       : Prop → Prop → Prop
+  ⟦(pi prop 0 prop)                 · 0⟧ :: -- [5]  not       : Prop → Prop
+  ⟦prop                             · 0⟧ :: -- [4]  false     : Prop
+  ⟦prop                             · 0⟧ :: -- [3]  true      : Prop
+  ⟦(pi (fv 0) 0 $ pi (fv 0) 0 prop) · 0⟧ :: -- [2]  equals    : setvar → setvar → Prop
+  ⟦(fv 0)                           · 0⟧ :: -- [1]  arbitrary : setvar 
+  ⟦type                             · 0⟧    -- [0]  setvar    : Type
 
 def c₁ :=
-  ⟦(pi (fv 0) $ pi (fv 0) prop) · 0⟧ :: -- [13] mem : setvar → setvar → Prop
+  ⟦(pi (fv 0) 0 $ pi (fv 0) 0 prop) · 0⟧ :: -- [13] mem : setvar → setvar → Prop
   c₀
 
 def and := fv 6
 def iff := fv 9
-def all := app (fv 10) ∘ lam (fv 0)
-def exi := app (fv 11) ∘ lam (fv 0)
+def all := app (fv 10) ∘ lam (fv 0) 0
+def exi := app (fv 11) ∘ lam (fv 0) 0
 def mem := fv 13
 
 def e₁ :=
-  (lam (pi (fv 0) (pi (fv 0) prop))
+  (lam (pi (fv 0) 0 $ pi (fv 0) 0 prop) 0
     (all $ exi $ all $
       (bin (bin (bv 0) mem (bv 1))
        iff (bin (bin (bv 0) mem (bv 2))

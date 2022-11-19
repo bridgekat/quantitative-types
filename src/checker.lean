@@ -17,9 +17,9 @@ def expr.as_sort : expr → string ⊕ nat
 | (sort s) := sum.inr s
 | e        := sum.inl $ "expression " ++ e.show ++ " is not a sort"
 
-def expr.as_pi : expr → string ⊕ (expr × expr)
-| (pi e₁ e₂) := sum.inr (e₁, e₂)
-| e          := sum.inl $ "expression " ++ e.show ++ " is not a function"
+def expr.as_pi : expr → string ⊕ (expr × mult × expr)
+| (pi e₁ π e₂) := sum.inr (e₁, π, e₂)
+| e            := sum.inl $ "expression " ++ e.show ++ " is not a function"
 
 def ctx.try_nth {γ : ctype} (Γ : ctx γ) (n : nat) : string ⊕ (expr × mult) :=
   match Γ.nth n with
@@ -41,14 +41,14 @@ def expr.check {γ : ctype} (env : ctx γ) : expr → Π {δ : ctype}, ctx δ �
     p        ← t₁.as_pi,
     ⟨t₂, π₂⟩ ← e₂.check stk,
     if p.fst = t₂
-    then return (p.snd.make_replace e₂, 0) -- TODO
+    then return (p.snd.snd.make_replace e₂, 0) -- TODO
     else sum.inl $ "argument type mismatch: " ++ p.fst.show ++ " != " ++ t₂.show }
-| (lam e₁ e₂) δ stk := do
+| (lam e₁ π e₂) δ stk := do
   { ⟨t₁, π₁⟩ ← e₁.check stk,
     _        ← t₁.as_sort,
     ⟨t₂, π₂⟩ ← e₂.check (cons e₁ 0 stk), -- TODO
-    return (pi e₁ t₂, 0) } -- TODO
-| (pi e₁ e₂) δ stk := do
+    return (pi e₁ π t₂, 0) } -- TODO
+| (pi e₁ π e₂) δ stk := do
   { ⟨t₁, π₁⟩ ← e₁.check stk,
     s₁       ← t₁.as_sort,
     ⟨t₂, π₂⟩ ← e₂.check (cons e₁ 0 stk), -- TODO

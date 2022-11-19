@@ -4,29 +4,22 @@ import algebra.module.basic
 import expr
 
 namespace quantitative_types
+section
 
-instance : has_zero mult := ⟨mult.zero⟩
-instance : has_one mult := ⟨mult.one⟩
-notation `ω` := mult.many
-
-def mult.show : mult → string
-| 0 := "0"
-| 1 := "1"
-| ω := "ω"
+open mult
+open ctx
 
 def mult.add : mult → mult → mult
-| mult.zero a         := a
-| mult.one  mult.zero := mult.one
-| _ _                 := mult.many
+| 0 a := a
+| 1 0 := 1
+| _ _ := ω
 
 def mult.mul : mult → mult → mult
-| mult.zero _         := mult.zero
-| mult.one  a         := a
-| mult.many mult.zero := mult.zero
-| mult.many _         := mult.many
+| 0 _ := 0
+| 1 a := a
+| ω 0 := 0
+| ω _ := ω
 
-instance : has_to_string mult := ⟨mult.show⟩
-instance : has_repr mult := ⟨mult.show⟩
 instance : has_add mult := ⟨mult.add⟩
 instance : has_mul mult := ⟨mult.mul⟩
 
@@ -59,40 +52,30 @@ instance : semiring mult :=
   left_distrib := mult.left_distrib,
   right_distrib := mult.right_distrib }
 
-notation `⟦` t:max ` · ` π:max `⟧` ` :: ` Γ:90 := ctx.cons t π Γ
-notation `⟦` t:max ` · ` π:max `⟧`             := ctx.cons t π ctx.nil
-
-def ctx.show : Π {γ : ctype}, ctx γ → string
-| []       ctx.nil          := "ctx.nil"
-| [t]      (ctx.cons _ π _) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧"
-| (t :: γ) (ctx.cons _ π Γ) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧ :: \n" ++ ctx.show Γ 
-
 def ctx.length : Π {γ : ctype}, ctx γ → nat
 | γ _ := γ.length
 
 def ctx.nth : Π {γ : ctype}, ctx γ → nat → option (expr × mult)
-| []       ctx.nil          _       := option.none
-| (t :: γ) (ctx.cons _ π Γ) 0       := option.some (t, π)
-| (t :: γ) (ctx.cons _ π Γ) (n + 1) := ctx.nth Γ n
+| []       nil          _       := option.none
+| (t :: γ) (cons _ π Γ) 0       := option.some (t, π)
+| (t :: γ) (cons _ π Γ) (n + 1) := ctx.nth Γ n
 
 def ctx.zero : Π {γ : ctype}, ctx γ
-| []       := ctx.nil
-| (t :: γ) := ctx.cons t mult.zero ctx.zero
+| []       := nil
+| (t :: γ) := cons t mult.zero ctx.zero
 
 def ctx.one : Π {γ : ctype}, ctx γ
-| []       := ctx.nil
-| (t :: γ) := ctx.cons t mult.one ctx.one
+| []       := nil
+| (t :: γ) := cons t mult.one ctx.one
 
 def ctx.add : Π {γ : ctype}, ctx γ → ctx γ → ctx γ
-| []       ctx.nil            ctx.nil            := ctx.nil
-| (t :: γ) (ctx.cons _ π₁ Γ₁) (ctx.cons _ π₂ Γ₂) := ctx.cons t (π₁ + π₂) (ctx.add Γ₁ Γ₂)
+| []       nil            nil            := nil
+| (t :: γ) (cons _ π₁ Γ₁) (cons _ π₂ Γ₂) := cons t (π₁ + π₂) (ctx.add Γ₁ Γ₂)
 
 def ctx.smul : Π {γ : ctype}, mult → ctx γ → ctx γ
-| []       _  ctx.nil          := ctx.nil
-| (t :: γ) π' (ctx.cons _ π Γ) := ctx.cons t (π' * π) (ctx.smul π' Γ)
+| []       _  nil          := nil
+| (t :: γ) π' (cons _ π Γ) := cons t (π' * π) (ctx.smul π' Γ)
 
-instance {γ : ctype} : has_to_string (ctx γ) := ⟨ctx.show⟩
-instance {γ : ctype} : has_repr (ctx γ) := ⟨ctx.show⟩
 instance {γ : ctype} : has_zero (ctx γ) := ⟨ctx.zero⟩
 instance {γ : ctype} : has_one (ctx γ) := ⟨ctx.one⟩
 instance {γ : ctype} : has_add (ctx γ) := ⟨ctx.add⟩
@@ -100,10 +83,10 @@ instance {γ : ctype} : has_smul mult (ctx γ) := ⟨ctx.smul⟩
 
 @[simp] lemma ctx.zero_cons {γ : ctype} {t : expr} : (0 : ctx (t :: γ)) = (⟦t · 0⟧ :: (0 : ctx γ)) := rfl
 @[simp] lemma ctx.one_cons {γ : ctype} {t : expr} : (1 : ctx (t :: γ)) = (⟦t · 1⟧ :: (1 : ctx γ)) := rfl
-@[simp] lemma ctx.add_nil {γ : ctype} : ctx.nil + ctx.nil = ctx.nil := rfl
+@[simp] lemma ctx.add_nil {γ : ctype} : nil + nil = nil := rfl
 @[simp] lemma ctx.add_cons {γ : ctype} {t : expr} {Γ₁ Γ₂ : ctx γ} {π₁ π₂ : mult} :
   ⟦t · π₁⟧ :: Γ₁ + ⟦t · π₂⟧ :: Γ₂ = ⟦t · (π₁ + π₂)⟧ :: (Γ₁ + Γ₂) := rfl
-@[simp] lemma ctx.smul_nil {γ : ctype} {π : mult} : π • ctx.nil = ctx.nil := rfl
+@[simp] lemma ctx.smul_nil {γ : ctype} {π : mult} : π • nil = nil := rfl
 @[simp] lemma ctx.smul_cons {γ : ctype} {t : expr} {Γ : ctx γ} {π' π : mult} :
   π' • ⟦t · π⟧ :: Γ = ⟦t · (π' * π)⟧ :: (π' • Γ) := rfl
 
@@ -126,12 +109,14 @@ lemma ctx.add_assoc {γ : ctype} (Γ₁ Γ₂ Γ₃ : ctx γ) : (Γ₁ + Γ₂) 
     simp [ih] at ⊢,
     rw mult.add_assoc } }
 
-@[simp] lemma ctx.zero_add {γ : ctype} (Γ : ctx γ) : 0 + Γ = Γ := by
+@[simp]
+lemma ctx.zero_add {γ : ctype} (Γ : ctx γ) : 0 + Γ = Γ := by
 { induction γ,
   case list.nil : { cases Γ, refl },
   case list.cons : t γ ih { cases Γ with _ _ π Γ', simp [ih] at ⊢ } }
 
-@[simp] lemma ctx.add_zero {γ : ctype} (Γ : ctx γ) : Γ + 0 = Γ := by
+@[simp]
+lemma ctx.add_zero {γ : ctype} (Γ : ctx γ) : Γ + 0 = Γ := by
 { rw ctx.add_comm _ _, exact ctx.zero_add Γ }
 
 instance {γ : ctype} : add_comm_monoid (ctx γ) :=
@@ -183,4 +168,5 @@ instance {γ : ctype} : module mult (ctx γ) :=
   zero_smul := ctx.zero_smul,
   add_smul := ctx.add_smul }
 
+end
 end quantitative_types

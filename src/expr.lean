@@ -1,35 +1,17 @@
 import defs
 
 namespace quantitative_types
+section
 
 open idx
 open expr
 
-def idx.show : idx → string
-| (bound id) := "$b" ++ to_string id
-| (free id)  := "$f" ++ to_string id
-
-instance : has_to_string idx := ⟨idx.show⟩
-instance : has_repr idx := ⟨idx.show⟩
-
-def expr.show : expr → string
-| (sort 0)        := "Prop"
-| (sort 1)        := "Type"
-| (sort (s + 1))  := "Type " ++ to_string s
-| (var v)         := v.show
-| (app l r)       := "(" ++ l.show ++ " " ++ r.show ++ ")"
-| (lam t r)       := "(\\$: " ++ t.show ++ " => " ++ r.show ++ ")"
-| (pi t r)        := "($: " ++ t.show ++ " -> " ++ r.show ++ ")"
-
-instance : has_to_string expr := ⟨expr.show⟩
-instance : has_repr expr := ⟨expr.show⟩
-
 def expr.update_vars : expr → (nat → idx → expr) → nat → expr
-| (sort s)  f n := sort s
-| (var v)   f n := f n v
-| (app l r) f n := app (l.update_vars f n) (r.update_vars f n)
-| (lam t r) f n := lam (t.update_vars f n) (r.update_vars f (n + 1))
-| (pi t r)  f n := pi (t.update_vars f n) (r.update_vars f (n + 1))
+| (sort s)    f n := sort s
+| (var v)     f n := f n v
+| (app l r)   f n := app (l.update_vars f n) (r.update_vars f n)
+| (lam t π r) f n := lam (t.update_vars f n) π (r.update_vars f (n + 1))
+| (pi t π r)  f n := pi (t.update_vars f n) π (r.update_vars f (n + 1))
 
 /-- Make a free variable into an "overflowed" bound variable. -/
 def expr.make_bound : expr → nat → expr
@@ -44,22 +26,23 @@ def expr.make_replace : expr → expr → expr
     Note that this function is only a syntactic operation, and does not check well-formedness.
     It does not terminate on inputs like (\x => x x x) (\x => x x x). -/
 meta def expr.reduce : expr → expr
-| (sort s)  := sort s
-| (var v)   := var v
-| (app l r) :=
+| (sort s)    := sort s
+| (var v)     := var v
+| (app l r)   :=
   let l := l.reduce, r := r.reduce in
     match l with
-    | (lam lt lr) := (lr.make_replace r).reduce 
-    | _           := app l r
+    | (lam lt lπ lr) := (lr.make_replace r).reduce 
+    | _              := app l r
     end
-| (lam t r) := lam t.reduce r.reduce
-| (pi t r)  := pi t.reduce r.reduce
+| (lam t π r) := lam t.reduce π r.reduce
+| (pi t π r)  := pi t.reduce π r.reduce
 
 def expr.size : expr → int
-| (sort s)  := 1
-| (var v)   := 1
-| (app l r) := l.size + r.size + 1
-| (lam t r) := t.size + r.size + 1
-| (pi t r)  := t.size + r.size + 1
+| (sort s)    := 1
+| (var v)     := 1
+| (app l r)   := l.size + r.size + 1
+| (lam t π r) := t.size + r.size + 1
+| (pi t π r)  := t.size + r.size + 1
 
+end
 end quantitative_types
