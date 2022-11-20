@@ -11,7 +11,7 @@ open mult
 
 instance : has_zero mult := ⟨zero⟩
 instance : has_one mult := ⟨one⟩
-notation `ω` := many
+notation `ω`:max := many
 
 def mult.show : mult → string
 | 0 := "0"
@@ -38,21 +38,21 @@ instance : has_repr idx := ⟨idx.show⟩
 /-- Expressions (preterms) -/
 @[derive decidable_eq]
 inductive expr : Type
-| sort : nat →                expr
-| var  : idx →                expr
-| app  : expr → expr →        expr
-| lam  : expr → mult → expr → expr
-| pi   : expr → mult → expr → expr
+| sort : nat →                       expr
+| var  : mult → idx →                expr
+| app  : expr → expr →               expr
+| lam  : mult → expr → expr →        expr
+| pi   : mult → expr → mult → expr → expr
 open expr
 
 def expr.show : expr → string
-| (sort 0)        := "Prop"
-| (sort 1)        := "Type"
-| (sort (s + 1))  := "Type " ++ to_string s
-| (var v)         := v.show
-| (app l r)       := "(" ++ l.show ++ " " ++ r.show ++ ")"
-| (lam t π r)     := "(fun $: " ++ t.show ++ " · " ++ π.show ++ " => " ++ r.show ++ ")"
-| (pi t π r)      := "($: " ++ t.show ++ " · " ++ π.show ++ " -> " ++ r.show ++ ")"
+| (sort 0)         := "Prop"
+| (sort 1)         := "Type"
+| (sort (s + 1))   := "Type " ++ to_string s
+| (var π v)        := π.show ++ "•" ++ v.show
+| (app l r)        := "(" ++ l.show ++ " " ++ r.show ++ ")"
+| (lam π t e)      := "(fun $: " ++ π.show ++ "•" ++ t.show ++ " => " ++ e.show ++ ")"
+| (pi π₁ t₁ π₂ t₂) := "($: " ++ π₁.show ++ "•" ++ t₁.show ++ " -> " ++ π₂.show ++ "•" ++ t₂.show ++ ")"
 
 instance : has_to_string expr := ⟨expr.show⟩
 instance : has_repr expr := ⟨expr.show⟩
@@ -64,16 +64,16 @@ def ctype := list expr
 @[derive decidable_eq]
 inductive ctx : ctype → Type
 | nil  :                                              ctx []
-| cons : Π {γ : ctype} (t : expr) (π : mult), ctx γ → ctx (t :: γ)
+| cons : Π {γ : ctype} (π : mult) (t : expr), ctx γ → ctx (t :: γ)
 open ctx
 
-notation `⟦` t:max ` · ` π:max `⟧` ` :: ` Γ:90 := cons t π Γ
-notation `⟦` t:max ` · ` π:max `⟧`             := cons t π nil
+notation `⟦`:max π:max ` • `:max t:max `⟧`:max ` :: `:max Γ:max := cons π t Γ
+notation `⟦`:max π:max ` • `:max t:max `⟧`:max                  := cons π t nil
 
 def ctx.show : Π {γ : ctype}, ctx γ → string
 | []       nil          := "ctx.nil\n"
-| [t]      (cons _ π _) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧\n"
-| (t :: γ) (cons _ π Γ) := "⟦" ++ t.show ++ " · " ++ π.show ++ "⟧ ::\n" ++ ctx.show Γ 
+| [t]      (cons π _ _) := "⟦" ++ π.show ++ "•" ++ t.show ++ "⟧\n"
+| (t :: γ) (cons π _ Γ) := "⟦" ++ π.show ++ "•" ++ t.show ++ "⟧ ::\n" ++ ctx.show Γ 
 
 instance {γ : ctype} : has_to_string (ctx γ) := ⟨ctx.show⟩
 instance {γ : ctype} : has_repr (ctx γ) := ⟨ctx.show⟩

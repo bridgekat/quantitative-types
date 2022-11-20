@@ -55,40 +55,40 @@ instance : semiring mult :=
 def ctx.length : Π {γ : ctype}, ctx γ → nat
 | γ _ := γ.length
 
-def ctx.nth : Π {γ : ctype}, ctx γ → nat → option (expr × mult)
+def ctx.nth : Π {γ : ctype}, ctx γ → nat → option (mult × expr)
 | []       nil          _       := option.none
-| (t :: γ) (cons _ π Γ) 0       := option.some (t, π)
-| (t :: γ) (cons _ π Γ) (n + 1) := ctx.nth Γ n
+| (t :: γ) (cons π _ Γ) 0       := option.some (π, t)
+| (t :: γ) (cons π _ Γ) (n + 1) := ctx.nth Γ n
 
 def ctx.zero : Π {γ : ctype}, ctx γ
 | []       := nil
-| (t :: γ) := cons t mult.zero ctx.zero
+| (t :: γ) := cons 0 t ctx.zero
 
 def ctx.one : Π {γ : ctype}, ctx γ
 | []       := nil
-| (t :: γ) := cons t mult.one ctx.one
+| (t :: γ) := cons 1 t ctx.one
 
 def ctx.add : Π {γ : ctype}, ctx γ → ctx γ → ctx γ
 | []       nil            nil            := nil
-| (t :: γ) (cons _ π₁ Γ₁) (cons _ π₂ Γ₂) := cons t (π₁ + π₂) (ctx.add Γ₁ Γ₂)
+| (t :: γ) (cons π₁ _ Γ₁) (cons π₂ _ Γ₂) := cons (π₁ + π₂) t (ctx.add Γ₁ Γ₂)
 
 def ctx.smul : Π {γ : ctype}, mult → ctx γ → ctx γ
 | []       _  nil          := nil
-| (t :: γ) π' (cons _ π Γ) := cons t (π' * π) (ctx.smul π' Γ)
+| (t :: γ) π' (cons π _ Γ) := cons (π' * π) t (ctx.smul π' Γ)
 
 instance {γ : ctype} : has_zero (ctx γ) := ⟨ctx.zero⟩
 instance {γ : ctype} : has_one (ctx γ) := ⟨ctx.one⟩
 instance {γ : ctype} : has_add (ctx γ) := ⟨ctx.add⟩
 instance {γ : ctype} : has_smul mult (ctx γ) := ⟨ctx.smul⟩
 
-@[simp] lemma ctx.zero_cons {γ : ctype} {t : expr} : (0 : ctx (t :: γ)) = (⟦t · 0⟧ :: (0 : ctx γ)) := rfl
-@[simp] lemma ctx.one_cons {γ : ctype} {t : expr} : (1 : ctx (t :: γ)) = (⟦t · 1⟧ :: (1 : ctx γ)) := rfl
+@[simp] lemma ctx.zero_cons {γ : ctype} {t : expr} : (0 : ctx (t :: γ)) = (⟦0 • t⟧ :: (0 : ctx γ)) := rfl
+@[simp] lemma ctx.one_cons {γ : ctype} {t : expr} : (1 : ctx (t :: γ)) = (⟦1 • t⟧ :: (1 : ctx γ)) := rfl
 @[simp] lemma ctx.add_nil {γ : ctype} : nil + nil = nil := rfl
-@[simp] lemma ctx.add_cons {γ : ctype} {t : expr} {Γ₁ Γ₂ : ctx γ} {π₁ π₂ : mult} :
-  ⟦t · π₁⟧ :: Γ₁ + ⟦t · π₂⟧ :: Γ₂ = ⟦t · (π₁ + π₂)⟧ :: (Γ₁ + Γ₂) := rfl
+@[simp] lemma ctx.add_cons {γ : ctype} {t : expr} {π₁ π₂ : mult} {Γ₁ Γ₂ : ctx γ} :
+  ⟦π₁ • t⟧ :: Γ₁ + ⟦π₂ • t⟧ :: Γ₂ = ⟦(π₁ + π₂) • t⟧ :: (Γ₁ + Γ₂) := rfl
 @[simp] lemma ctx.smul_nil {γ : ctype} {π : mult} : π • nil = nil := rfl
 @[simp] lemma ctx.smul_cons {γ : ctype} {t : expr} {Γ : ctx γ} {π' π : mult} :
-  π' • ⟦t · π⟧ :: Γ = ⟦t · (π' * π)⟧ :: (π' • Γ) := rfl
+  π' • ⟦π • t⟧ :: Γ = ⟦(π' * π) • t⟧ :: (π' • Γ) := rfl
 
 lemma ctx.add_comm {γ : ctype} (Γ₁ Γ₂ : ctx γ) : Γ₁ + Γ₂ = Γ₂ + Γ₁ := by
 { induction γ,
