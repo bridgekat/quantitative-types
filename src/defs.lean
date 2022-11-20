@@ -2,21 +2,36 @@ namespace quantitative_types
 section
 
 /-- Multiplicities (we use the 3-element semiring here.) -/
+/-
 @[derive decidable_eq]
 inductive mult : Type
 | zero : mult          -- No "run-time presence": for use in dependent type checking only
 | one  : mult          -- Linear resources
 | many : mult          -- Unrestricted resources
 open mult
+-/
 
-instance : has_zero mult := ⟨zero⟩
-instance : has_one mult := ⟨one⟩
-notation `ω`:max := many
+@[derive decidable_eq]
+inductive mult : Type
+| none
+| read
+| write
+| init
+| free
+| all
+| error
+open mult
+
+instance : has_zero mult := ⟨none⟩
 
 def mult.show : mult → string
-| 0 := "0"
-| 1 := "1"
-| ω := "ω"
+| none  := "∅"
+| read  := "read"
+| write := "write"
+| init  := "init"
+| free  := "free"
+| all   := "all"
+| error := "☒"
 
 instance : has_to_string mult := ⟨mult.show⟩
 instance : has_repr mult := ⟨mult.show⟩
@@ -43,16 +58,18 @@ inductive expr : Type
 | app  : expr → expr →               expr
 | lam  : mult → expr → expr →        expr
 | pi   : mult → expr → mult → expr → expr
+| letr : expr → expr →               expr
 open expr
 
 def expr.show : expr → string
 | (sort 0)         := "Prop"
 | (sort 1)         := "Type"
 | (sort (s + 1))   := "Type " ++ to_string s
-| (var π v)        := π.show ++ "•" ++ v.show
+| (var π v)        := "(" ++ π.show ++ "•" ++ v.show ++ ")"
 | (app l r)        := "(" ++ l.show ++ " " ++ r.show ++ ")"
 | (lam π t e)      := "(fun $: " ++ π.show ++ "•" ++ t.show ++ " => " ++ e.show ++ ")"
 | (pi π₁ t₁ π₂ t₂) := "($: " ++ π₁.show ++ "•" ++ t₁.show ++ " -> " ++ π₂.show ++ "•" ++ t₂.show ++ ")"
+| (letr e₁ e₂)     := "(let $ := " ++ e₁.show ++ " in " ++ e₂.show ++ ")"
 
 instance : has_to_string expr := ⟨expr.show⟩
 instance : has_repr expr := ⟨expr.show⟩

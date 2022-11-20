@@ -12,6 +12,7 @@ def expr.update_vars : expr → (nat → mult → idx → expr) → nat → expr
 | (app l r)        f n := app (l.update_vars f n) (r.update_vars f n)
 | (lam π t e)      f n := lam π (t.update_vars f n) (e.update_vars f (n + 1))
 | (pi π₁ t₁ π₂ t₂) f n := pi π₁ (t₁.update_vars f n) π₂ (t₂.update_vars f (n + 1))
+| (letr e₁ e₂)     f n := letr (e₁.update_vars f n) (e₂.update_vars f (n + 1))
 
 /-- Make a free variable into an "overflowed" bound variable. -/
 def expr.make_bound : expr → nat → expr
@@ -37,6 +38,10 @@ meta def expr.reduce : expr → expr
   end
 | (lam π t e)      := lam π t.reduce e.reduce
 | (pi π₁ t₁ π₂ t₂) := pi π₁ t₁.reduce π₂ t₂.reduce
+| (letr e₁ e₂)     :=
+  let e₁ := e₁.reduce,
+      e₂ := e₂.reduce
+  in (e₂.make_replace e₁).reduce 
 
 def expr.size : expr → int
 | (sort s)         := 1
@@ -44,6 +49,7 @@ def expr.size : expr → int
 | (app l r)        := l.size + r.size + 1
 | (lam π t e)      := t.size + e.size + 1
 | (pi π₁ t₁ π₂ t₂) := t₁.size + t₂.size + 1
+| (letr e₁ e₂)     := e₁.size + e₂.size + 1
 
 end
 end quantitative_types
